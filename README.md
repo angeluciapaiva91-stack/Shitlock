@@ -1,0 +1,2 @@
+# Shitlock
+Script de roblox
