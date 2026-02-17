@@ -1,0 +1,72 @@
+-- LocalScript
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local shiftLock = false
+local defaultZoom = 12
+local shiftZoom = 6
+
+-- Criar GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 60, 0, 60)
+button.Position = UDim2.new(0.5, -30, 0, 20)
+button.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+button.TextColor3 = Color3.new(1,1,1)
+button.TextScaled = true
+button.Text = "OFF"
+button.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1, 0)
+corner.Parent = button
+
+-- Função ativar
+local function enableShiftLock()
+	shiftLock = true
+	button.Text = "ON"
+	player.CameraMode = Enum.CameraMode.Classic
+	player.CameraMinZoomDistance = shiftZoom
+	player.CameraMaxZoomDistance = shiftZoom
+end
+
+-- Função desativar
+local function disableShiftLock()
+	shiftLock = false
+	button.Text = "OFF"
+	player.CameraMinZoomDistance = defaultZoom
+	player.CameraMaxZoomDistance = defaultZoom
+end
+
+button.MouseButton1Click:Connect(function()
+	if shiftLock then
+		disableShiftLock()
+	else
+		enableShiftLock()
+	end
+end)
+
+-- Fazer personagem girar com a câmera
+RunService.RenderStepped:Connect(function()
+	if shiftLock and player.Character then
+		local humanoid = player.Character:FindFirstChild("Humanoid")
+		local root = player.Character:FindFirstChild("HumanoidRootPart")
+		
+		if humanoid and root then
+			humanoid.AutoRotate = false
+			
+			local lookVector = camera.CFrame.LookVector
+			root.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
+		end
+	else
+		if player.Character and player.Character:FindFirstChild("Humanoid") then
+			player.Character.Humanoid.AutoRotate = true
+		end
+	end
+end)
